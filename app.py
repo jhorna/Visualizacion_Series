@@ -17,6 +17,9 @@ try:
     col2.metric("Máximo", max(serie))
     col3.metric("Mínimo", min(serie))
     
+    # Selecciona el tipo de gráfica
+    tipo = st.selectbox("Tipo de gráfica:", ["Línea", "Área", "Barras"])
+    
     # Calcular línea de tendencia y proyección
     X = np.array(range(len(serie))).reshape(-1, 1)
     y = np.array(serie)
@@ -28,38 +31,104 @@ try:
     X_futuro = np.array(range(len(serie), len(serie) + 6)).reshape(-1, 1)
     y_futuro = modelo.predict(X_futuro)
     
-    # Crear gráfica con Plotly
+    # Crear gráfica con Plotly (según tipo seleccionado)
     fig = go.Figure()
-    
-    # Datos originales
-    fig.add_trace(go.Scatter(
-        x=list(range(len(serie))),
-        y=serie,
-        mode='lines+markers',
-        name='Datos reales',
-        line=dict(color='blue', width=2),
-        marker=dict(size=8)
-    ))
     
     # Línea de tendencia histórica
     y_tendencia = modelo.predict(X)
-    fig.add_trace(go.Scatter(
-        x=list(range(len(serie))),
-        y=y_tendencia,
-        mode='lines',
-        name='Tendencia',
-        line=dict(color='orange', width=2, dash='dash')
-    ))
     
     # Proyección futura
-    fig.add_trace(go.Scatter(
-        x=list(range(len(serie)-1, len(serie) + 6)),
-        y=list([serie[-1]]) + list(y_futuro),
-        mode='lines+markers',
-        name='Proyección (6 períodos)',
-        line=dict(color='red', width=2, dash='dot'),
-        marker=dict(size=6)
-    ))
+    x_proyeccion = list(range(len(serie)-1, len(serie) + 6))
+    y_proyeccion = list([serie[-1]]) + list(y_futuro)
+    
+    if tipo == "Línea":
+        # Datos originales
+        fig.add_trace(go.Scatter(
+            x=list(range(len(serie))),
+            y=serie,
+            mode='lines+markers',
+            name='Datos reales',
+            line=dict(color='blue', width=2),
+            marker=dict(size=8)
+        ))
+        
+        # Tendencia
+        fig.add_trace(go.Scatter(
+            x=list(range(len(serie))),
+            y=y_tendencia,
+            mode='lines',
+            name='Tendencia',
+            line=dict(color='orange', width=2, dash='dash')
+        ))
+        
+        # Proyección
+        fig.add_trace(go.Scatter(
+            x=x_proyeccion,
+            y=y_proyeccion,
+            mode='lines+markers',
+            name='Proyección (6 períodos)',
+            line=dict(color='red', width=2, dash='dot'),
+            marker=dict(size=6)
+        ))
+    
+    elif tipo == "Área":
+        # Datos originales (con área)
+        fig.add_trace(go.Scatter(
+            x=list(range(len(serie))),
+            y=serie,
+            mode='lines+markers',
+            name='Datos reales',
+            line=dict(color='blue', width=2),
+            fill='tozeroy',
+            marker=dict(size=8)
+        ))
+        
+        # Tendencia
+        fig.add_trace(go.Scatter(
+            x=list(range(len(serie))),
+            y=y_tendencia,
+            mode='lines',
+            name='Tendencia',
+            line=dict(color='orange', width=2, dash='dash')
+        ))
+        
+        # Proyección
+        fig.add_trace(go.Scatter(
+            x=x_proyeccion,
+            y=y_proyeccion,
+            mode='lines+markers',
+            name='Proyección (6 períodos)',
+            line=dict(color='red', width=2, dash='dot'),
+            marker=dict(size=6)
+        ))
+    
+    else:  # Barras
+        # Datos originales (barras)
+        fig.add_trace(go.Bar(
+            x=list(range(len(serie))),
+            y=serie,
+            name='Datos reales',
+            marker=dict(color='blue')
+        ))
+        
+        # Tendencia (línea sobre barras)
+        fig.add_trace(go.Scatter(
+            x=list(range(len(serie))),
+            y=y_tendencia,
+            mode='lines',
+            name='Tendencia',
+            line=dict(color='orange', width=2, dash='dash')
+        ))
+        
+        # Proyección (línea)
+        fig.add_trace(go.Scatter(
+            x=x_proyeccion,
+            y=y_proyeccion,
+            mode='lines+markers',
+            name='Proyección (6 períodos)',
+            line=dict(color='red', width=2, dash='dot'),
+            marker=dict(size=6)
+        ))
     
     # Diseño
     fig.update_layout(
