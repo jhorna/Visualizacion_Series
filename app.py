@@ -17,9 +17,6 @@ try:
     col2.metric("Máximo", max(serie))
     col3.metric("Mínimo", min(serie))
     
-    # Selecciona el tipo de gráfica
-    tipo = st.selectbox("Tipo de gráfica:", ["Línea", "Área", "Barras"])
-    
     # Calcular línea de tendencia y proyección
     X = np.array(range(len(serie))).reshape(-1, 1)
     y = np.array(serie)
